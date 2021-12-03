@@ -1,27 +1,26 @@
 from __future__ import annotations
 from typing import Any, TYPE_CHECKING
 import napari
-from napari.layers.base.base import Layer
+from napari.layers import Image, Labels, Points, Shapes
+
+_HasMode = (Labels, Points, Shapes)
+_HasInterpolation = (Image, Labels)
 
 if TYPE_CHECKING:
     from napari.components.layerlist import LayerList
     from napari._qt.widgets.qt_viewer_dock_widget import QtViewerDockWidget
 
 _LAYERS = "layers"
-
+_NEAREST = "nearest"
 
 def _translate_layers(layers: LayerList):
     n_layer = len(layers)
     return [layers.pop(0) for _ in range(n_layer)]
     
 class ViewerState:
-    count = 0
     def __init__(self, 
                  viewer_params: dict[str, Any] = None, 
-                 layer_selection: tuple[int, str] = None,
-                 dock_widgets: dict[str, QtViewerDockWidget] = None,
-                 *,
-                 name: str = None
+                 dock_widgets: dict[str, QtViewerDockWidget] = None
                  ) -> None:
         if viewer_params is not None:
             self.layers = _translate_layers(viewer_params.pop(_LAYERS))
@@ -31,15 +30,7 @@ class ViewerState:
             self.viewer_params = {}
         
         self.dock_widgets  = dock_widgets or {}
-        
-        if name is None:
-            name = f"Task-{self.__class__.count}"
-            self.__class__.count += 1
-        self.name = name
-    
-    def __str__(self) -> str:
-        return self.name
-    
+            
     @classmethod
     def from_viewer(cls, viewer: napari.Viewer) -> ViewerState:
         return cls().save_state(viewer)
@@ -59,13 +50,28 @@ class ViewerState:
             if isinstance(value, dict):
                 try:
                     getattr(viewer, name).update(value)
-                except AttributeError:
-                    pass
-        
+                except Exception as e:
+                    # pass
+                    print(e)
+                
         # Update layer list
         for layer in self.layers:
+            if isinstance(layer, _HasInterpolation):
+                interp = layer.interpolation
+                layer.interpolation = _NEAREST
             viewer.add_layer(layer)
-        viewer.layers.selection = {}
+            if isinstance(layer, _HasInterpolation):
+                layer.interpolation = interp
+        
+        # Events should be emitted here to update layer control.
+        for layer in viewer.layers.selection:
+            if isinstance(layer, _HasMode):
+                layer.events.mode(mode=layer.mode)
+                
+        # Camera should be updated like this
+        viewer.camera.events.center()
+        viewer.camera.events.zoom()
+        # viewer.camera.events.angles()
             
         # Update dock widget visibility
         for dockname, dock in viewer.window._dock_widgets.items():
