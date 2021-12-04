@@ -47,13 +47,13 @@ class ViewerState:
         
         # Update camera, scale_bar etc.
         for name, value in self.viewer_params.items():
+            # TODO: dims
             if isinstance(value, dict):
                 try:
                     getattr(viewer, name).update(value)
-                except Exception as e:
-                    # pass
-                    print(e)
-                
+                except AttributeError:
+                    pass
+        
         # Update layer list
         for layer in self.layers:
             if isinstance(layer, _HasInterpolation):

@@ -1,24 +1,15 @@
-from typing import Callable
-from magicclass import magicclass, MagicTemplate, set_design, field, do_not_record
-from magicgui.widgets import Label
-import napari
-from napari._qt.widgets.qt_viewer_dock_widget import QtViewerDockWidget
+from magicclass import magicclass, MagicTemplate, set_design
+from magicclass.utils import show_messagebox
 
 from .taskpanel import TaskPanel, WIDTH, HEIGHT
-
-
-
-def find_dock_widget(widget):
-    while not isinstance(widget, QtViewerDockWidget):
-        widget = widget.parent()
-    return widget
 
 @magicclass(layout="horizontal", widget_type="scrollable")
 class TaskView(MagicTemplate):
     def __post_init__(self):
         default_task = TaskPanel()
-        default_task.callbacks.append(self._change_task)
         self.insert(0, default_task)
+        default_task.callbacks.append(self._change_task)
+        default_task._taskpanel.on_delete = lambda: self._remove_task(default_task)
         self.current_index = 0
         self.margins = (0, 0, 0, 0)
         self.min_height = HEIGHT + 40
@@ -37,7 +28,7 @@ class TaskView(MagicTemplate):
         
         new.viewer_state.update_viewer(self.parent_viewer)
         new._set_down(True)
-        self.native.parent().setVisible(True)
+        self.parent_dock_widget.setVisible(True)
     
     @set_design(text="+", font_size=48, 
                 min_width=WIDTH, max_width=WIDTH, width=WIDTH, 
@@ -51,5 +42,30 @@ class TaskView(MagicTemplate):
         self.insert(len(self)-1, new_task)
         self._change_task(new_task)
         new_task.callbacks.append(self._change_task)
+        new_task._taskpanel.on_delete = lambda: self._remove_task(new_task)
         self.parent_viewer.dims.ndisplay = 2
     
+    def _remove_task(self, task: TaskPanel):
+        if len(self) == 2:
+            show_messagebox("error", "Error", "This is the last task. You cannot delete it.",
+                            self.native)
+        else:
+            if task is self[self.current_index]:
+                # if current task is about to be deleted, we should change the task before
+                # the task deletion.
+                if self.current_index == 0:
+                    next_task = self[1]
+                else:
+                    next_task = self[self.current_index - 1]
+                self._change_task(next_task)
+            
+            # decrement current index if younger task is about to be deleted.
+            index = self.index(task)
+            if index < self.current_index:
+                self.current_index -= 1
+
+            # TODO: memory leak! layer is not completely deleted
+            self.remove(task)
+            task.viewer_state.layers.clear()
+            task._taskpanel.deleteLater()
+            del task

@@ -21,7 +21,7 @@ class QtTaskPanel(QPushButton):
         
         self.setLayout(QVBoxLayout())
         self.line_edit = QLineEdit(f"Task-{self.__class__.count + 1}", self)
-        self.line_edit.setFont(QFont("Consolas"))
+        self.line_edit.setFont(QFont("Arial"))
         self.line_edit.setAlignment(Qt.AlignCenter)
         self.line_edit.setStyleSheet("""QLineEdit {
                                             border: none
@@ -38,6 +38,8 @@ class QtTaskPanel(QPushButton):
         self.setFixedHeight(self.line_edit.height() + HEIGHT)
         self.setFixedWidth(WIDTH)
         self.__class__.count += 1
+        
+        self.on_delete = None
     
     def _set_pixmap(self, pixmap: QPixmap):
         size = QSize(WIDTH*1.6, HEIGHT*1.6)
@@ -48,6 +50,12 @@ class QtTaskPanel(QPushButton):
     def _contextmenu(self, pos: QPoint) -> None:
         menu = QMenu(self)
         
+        activate = QAction("Activate", menu)
+        @activate.triggered.connect
+        def _(e):
+            self.click()
+        menu.addAction(activate)
+        
         rename = QAction("Rename", menu)
         @rename.triggered.connect
         def _(e):
@@ -56,12 +64,15 @@ class QtTaskPanel(QPushButton):
         menu.addAction(rename)
         
         delete = QAction("Delete", menu)
-        delete.triggered.connect(lambda e: self.deleteLater()) # TODO: delete from container
+        delete.triggered.connect(lambda e: self._delete())
         menu.addAction(delete)
         
         menu.exec_(self.mapToGlobal(pos))
         
         return None
+    
+    def _delete(self):
+        self.on_delete()
             
 class TaskPanel(FreeWidget):
     def __init__(self):
