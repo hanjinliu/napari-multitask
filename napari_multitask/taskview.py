@@ -11,6 +11,7 @@ class TaskView(MagicTemplate):
         self.insert(0, default_task)
         default_task.callbacks.append(self._change_task)
         default_task._taskpanel.on_delete = lambda: self._remove_task(default_task)
+        default_task._set_down(True)
         self.current_index = 0
         self.margins = (0, 0, 0, 0)
         self.min_height = HEIGHT + 40
