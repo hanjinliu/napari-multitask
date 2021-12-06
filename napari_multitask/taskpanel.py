@@ -1,9 +1,8 @@
 
-from PyQt5.QtWidgets import QAction
 from magicclass.widgets import FreeWidget
 from qtpy.QtGui import QPixmap, QFont
 from qtpy.QtCore import Qt, QPoint, QSize
-from qtpy.QtWidgets import QPushButton, QVBoxLayout, QLineEdit, QLabel, QMenu
+from qtpy.QtWidgets import QPushButton, QVBoxLayout, QLineEdit, QLabel, QMenu, QAction
 
 import napari
 
@@ -13,6 +12,17 @@ WIDTH = 161
 HEIGHT = 100
 
 class QtTaskPanel(QPushButton):
+    """
+    This widget is appended to list every time new task is created.
+    Looks like:
+    
+    [  task name  ]
+     -------------
+    [             ]
+    [ screen shot ]
+    [  of viewer  ]
+    
+    """    
     count: int = 0
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -90,11 +100,7 @@ class TaskPanel(FreeWidget):
         image = viewer.window._screenshot(False)
         pixmap = QPixmap.fromImage(image)
         self._taskpanel._set_pixmap(pixmap)
-    
-    @property
-    def task_name(self):
-        return self._taskpanel.line_edit.text()
-    
+        
     def _set_down(self, down: bool):
         self._taskpanel.setDown(down)
     

@@ -18,6 +18,9 @@ def _translate_layers(layers: LayerList):
     return [layers.pop(0) for _ in range(n_layer)]
     
 class ViewerState:
+    """
+    This object stores (almost) all the information of viewer.
+    """    
     def __init__(self, 
                  viewer_params: dict[str, Any] = None, 
                  dock_widgets: dict[str, QtViewerDockWidget] = None
@@ -47,8 +50,10 @@ class ViewerState:
         
         # Update camera, scale_bar etc.
         for name, value in self.viewer_params.items():
-            # TODO: dims
             if isinstance(value, dict):
+                if name == "dims":
+                    # TODO: Bug in dims. Don't update all the dims for now.
+                    value = {"ndisplay": value.get("ndisplay", 2)}
                 try:
                     getattr(viewer, name).update(value)
                 except AttributeError:
@@ -68,11 +73,6 @@ class ViewerState:
             if isinstance(layer, _HasMode):
                 layer.events.mode(mode=layer.mode)
                 
-        # Camera should be updated like this
-        viewer.camera.events.center()
-        viewer.camera.events.zoom()
-        # viewer.camera.events.angles()
-            
         # Update dock widget visibility
         for dockname, dock in viewer.window._dock_widgets.items():
             dock.setVisible(dockname in self.dock_widgets.keys())

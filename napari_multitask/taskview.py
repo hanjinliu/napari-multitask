@@ -1,5 +1,6 @@
 from magicclass import magicclass, MagicTemplate, set_design
 from magicclass.utils import show_messagebox
+from napari_plugin_engine import napari_hook_implementation
 
 from .taskpanel import TaskPanel, WIDTH, HEIGHT
 
@@ -64,8 +65,15 @@ class TaskView(MagicTemplate):
             if index < self.current_index:
                 self.current_index -= 1
 
-            # TODO: memory leak! layer is not completely deleted
             self.remove(task)
             task.viewer_state.layers.clear()
             task._taskpanel.deleteLater()
             del task
+
+@napari_hook_implementation
+def napari_experimental_provide_dock_widget():
+    widget_options = {
+        "name": "napari-multitask",
+        "area": "bottom",
+    }
+    return TaskView, widget_options
