@@ -1,7 +1,6 @@
 from magicclass import magicclass, MagicTemplate, set_design
 from magicclass.utils import show_messagebox
 from napari_plugin_engine import napari_hook_implementation
-import napari
 from .taskpanel import TaskPanel, WIDTH, HEIGHT
 
 @magicclass(layout="horizontal", widget_type="scrollable")
