@@ -17,9 +17,9 @@ setup(
     author_email="liuhanjin-sc@g.ecc.u-tokyo.ac.jp",
     license="BSD 3-Clause",
     download_url="https://github.com/hanjinliu/napari-multitask",
-    packages=find_packages(),
+    packages=find_packages(exclude=["Figs"]),
     install_requires=[
-          "magic-class>=0.5.11"
+          "magic-class>=0.5.11",
     ],
     classifiers=["Framework :: napari",
                  "Programming Language :: Python",
@@ -28,5 +28,6 @@ setup(
                  "Programming Language :: Python :: 3.8",
                  "Programming Language :: Python :: 3.9",
                  ],
+    entry_points={"napari.plugin": "napari-multitask = napari_multitask"},
     python_requires=">=3.7",
     )

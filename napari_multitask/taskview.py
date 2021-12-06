@@ -1,11 +1,11 @@
 from magicclass import magicclass, MagicTemplate, set_design
 from magicclass.utils import show_messagebox
 from napari_plugin_engine import napari_hook_implementation
-
+import napari
 from .taskpanel import TaskPanel, WIDTH, HEIGHT
 
 @magicclass(layout="horizontal", widget_type="scrollable")
-class TaskView(MagicTemplate):
+class TaskView(MagicTemplate):        
     def __post_init__(self):
         default_task = TaskPanel()
         self.insert(0, default_task)
