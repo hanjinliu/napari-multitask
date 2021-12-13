@@ -1,6 +1,6 @@
 
 from magicclass.widgets import FreeWidget
-from qtpy.QtGui import QPixmap, QFont
+from qtpy.QtGui import QPixmap, QFont, QGuiApplication
 from qtpy.QtCore import Qt, QPoint, QSize
 from qtpy.QtWidgets import QPushButton, QVBoxLayout, QLineEdit, QLabel, QMenu, QAction
 
@@ -10,6 +10,11 @@ from .viewerstate import ViewerState
 
 WIDTH = 161
 HEIGHT = 100
+
+def get_scale() -> float:
+    """Get screen scale of the main screen"""
+    screen = QGuiApplication.screens()[0]
+    return screen.devicePixelRatio()
 
 class QtTaskPanel(QPushButton):
     """
@@ -52,7 +57,8 @@ class QtTaskPanel(QPushButton):
         self.on_delete = None
     
     def _set_pixmap(self, pixmap: QPixmap):
-        size = QSize(WIDTH*1.6, HEIGHT*1.6)
+        scale = get_scale() * 0.9
+        size = QSize(WIDTH*scale, HEIGHT*scale)
         self.image.setPixmap(
             pixmap.scaled(size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             )
