@@ -29,5 +29,5 @@ setup(
                  "Programming Language :: Python :: 3.9",
                  ],
     entry_points={"napari.plugin": "napari-multitask = napari_multitask"},
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     )
