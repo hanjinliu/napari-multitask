@@ -19,6 +19,7 @@ setup(
     download_url="https://github.com/hanjinliu/napari-multitask",
     packages=find_packages(exclude=["Figs"]),
     install_requires=[
+          "napari",
           "magic-class>=0.5.11",
     ],
     classifiers=["Framework :: napari",
